@@ -1,3 +1,5 @@
+#include "hash_tables.h"
+
 /**
 * hash_table_set - adds or updates an element in the hash table
 * @ht: pointer to the hash table

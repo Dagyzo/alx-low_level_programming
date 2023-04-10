@@ -1,52 +1,26 @@
-#include "hash_tables.h"
+int hash_table_set(hash_table_t *ht, const char *key, const char *value) {
+	if (key == NULL || strlen(key) == 0) {
+	return 0;  // key cannot be empty
+}
 
-/**
-* hash_table_set - adds or updates an element in the hash table
-* @ht: pointer to the hash table
-* @key: the key to add or update
-* @value: the value associated with the key
-* Return: 1 if it succeeded, 0 otherwise
-*/
-int hash_table_set(hash_table_t *ht, const char *key, const char *value)
-{
-	hash_node_t *new_node, *temp;
-	unsigned long int index;
+	// Compute the hash code using the hash function
+	unsigned int hash = hash_function(key) % ht->size;
 
-	if (!ht || !key || !*key || !value)
-		return (0);
-	index = key_index((const unsigned char *)key, ht->size);
-	temp = ht->array[index];
-	/* update value if key already exists */
-	while (temp)
-	{
-		if (strcmp(temp->key, key) == 0)
-		{
-			free(temp->value);
-			temp->value = strdup(value);
-			if (!temp->value)
-				return (0);
-			return (1);
-		}
-		temp = temp->next;
-	}
-	/* add new node */
-	new_node = malloc(sizeof(hash_node_t));
-	if (!new_node)
-		return (0);
-	new_node->key = strdup(key);
-	if (!new_node->key)
-	{
-		free(new_node);
-		return (0);
-	}
-	new_node->value = strdup(value);
-	if (!new_node->value)
-	{
-		free(new_node->key);
-		free(new_node);
-		return (0);
-	}
-	new_node->next = ht->array[index];
-	ht->array[index] = new_node;
-	return (1);
+	// Create a new node with the key and value
+	hash_node_t *new_node = malloc(sizeof(hash_node_t));
+    if (new_node == NULL) {
+        return 0;  // failed to allocate memory for new node
+    }
+    new_node->key = strdup(key);  // duplicate the key string
+    new_node->value = strdup(value);  // duplicate the value string
+
+    // Handle collisions by adding the new node at the beginning of the list
+    if (ht->array[hash] != NULL) {
+        new_node->next = ht->array[hash];
+    } else {
+        new_node->next = NULL;
+    }
+    ht->array[hash] = new_node;
+
+    return 1;  // success
 }
